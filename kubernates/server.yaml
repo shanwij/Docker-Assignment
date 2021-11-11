@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment
+  labels:
+    app: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+      - name: nodejs-server
+        image: shanwij.azurecr.io/server:v1
+        ports:
+        - containerPort: 8001
+        env:
+          - name : DBURL
+            valueFrom:
+              configMapKeyRef:
+                name: db-config           
+                key: DBURL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-service
+spec:
+  type: ClusterIP
+  selector:
+    app: server
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8001
